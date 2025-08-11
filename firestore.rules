@@ -1,0 +1,41 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // The Admin UID
+    function adminId() {
+      return 'v9coxkgZAHWuNLHTGjLJLweDSC12';
+    }
+
+    // Menu can be read by anyone
+    match /Menu/{itemId} {
+      allow read: if true;
+      // Only the item's owner or the Admin can change it
+      allow write: if request.auth.uid == request.resource.data.ownerId || request.auth.uid == adminId();
+    }
+    
+    // User data rules
+    match /users/{userId} {
+      // An Admin can read any user's profile.
+      // A normal user can only read their own profile.
+      allow read: if request.auth.uid == adminId() || request.auth.uid == userId;
+      
+      // An Admin can change any user's profile (to set roles).
+      // A normal user can only change their own profile.
+      allow update: if request.auth.uid == adminId() || request.auth.uid == userId;
+
+      // Any new user can create their own profile
+      allow create: if request.auth.uid == userId;
+    }
+    
+    // Orders rules
+    match /Orders/{orderId} {
+      // A logged-in user can create an order
+      allow create: if request.auth.uid != null;
+      
+      // An Admin, the business Owner, or the Customer can read an order
+      allow read, update: if request.auth.uid == adminId() || request.auth.uid == resource.data.ownerId || request.auth.uid == resource.data.customerId;
+    }
+  }
+}

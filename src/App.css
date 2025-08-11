@@ -1,0 +1,91 @@
+:root {
+  --primary-color: #FBBF24;
+  --background-color: #FFFFFF;
+  --light-gray-bg: #F9FAFB;
+  --text-dark: #111827;
+  --text-medium: #4B5563;
+  --text-light: #9CA3AF;
+  --border-color: #E5E7EB;
+  --card-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --success-color: #22c55e;
+  --danger-color: #ef4444;
+}
+
+/* --- Main App Layout --- */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+.main-content {
+  flex-grow: 1;
+  width: 100%;
+}
+
+/* --- Navbar --- */
+.navbar {
+  background-color: var(--background-color);
+  border-bottom: 1px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 5%;
+  height: 70px;
+  box-sizing: border-box;
+}
+.nav-logo img {
+  height: 45px;
+  width: auto;
+  display: block;
+}
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.nav-links a, .nav-links .user-email {
+  font-weight: 500;
+  color: var(--text-medium);
+  text-decoration: none;
+  transition: color 0.2s;
+  font-size: 1rem;
+  white-space: nowrap;
+}
+.nav-links a:hover {
+  color: var(--text-dark);
+}
+.nav-links .signup-button, .nav-links .logout-btn {
+  background-color: var(--primary-color);
+  color: var(--text-dark);
+  border: none;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+.nav-links .signup-button:hover, .nav-links .logout-btn:hover {
+  opacity: 0.85;
+}
+
+/* --- UNIVERSAL PAGE CONTAINER --- */
+.page-container {
+  width: 100%;
+  max-width: 1200px; /* This sets the max width */
+  margin: 2rem auto;    /* This centers the container */
+  padding: 0 2rem;
+  box-sizing: border-box;
+}
+.page-container h1 {
+  font-family: var(--font-heading);
+  font-size: 2.5rem;
+  margin-top: 0;
+  margin-bottom: 2rem;
+}
+
+/* All other component styles */
+/* Add all the CSS for Dashboard, Auth Forms, Pantry, etc. here */

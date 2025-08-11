@@ -1,0 +1,19 @@
+/* ADMIN PAGE STYLES */
+.user-list-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 2rem;
+}
+.user-list-table th, .user-list-table td {
+  border: 1px solid var(--border-color);
+  padding: 0.75rem;
+  text-align: left;
+}
+.user-list-table th {
+  background-color: var(--light-gray-bg);
+}
+.user-list-table select {
+  padding: 0.5rem;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+}
