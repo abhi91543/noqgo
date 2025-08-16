@@ -7,6 +7,7 @@ import PantryView from './pages/PantryView';
 import LandingPage from './pages/LandingPage';
 import Profile from './pages/Profile';
 import Admin from './pages/Admin';
+import Venue from './pages/Venue';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminProtectedRoute from './components/AdminProtectedRoute';
 import './App.css';
@@ -18,7 +19,7 @@ import { doc, getDoc } from 'firebase/firestore';
 function App() {
   const [user, setUser] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
-  const [authLoading, setAuthLoading] = useState(true); // New loading state
+  const [authLoading, setAuthLoading] = useState(true);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -32,7 +33,7 @@ function App() {
       } else {
         setUserProfile(null);
       }
-      setAuthLoading(false); // Set loading to false after the check is complete
+      setAuthLoading(false);
     });
     return () => unsubscribe();
   }, []);
@@ -46,7 +47,7 @@ function App() {
     <div className="app-container">
       <nav className="navbar">
         <Link to="/" className="nav-logo">
-          <img src="/logo.png" alt="Interval Logo" />
+          <img src="/logo.png" alt="NoQGo Logo" />
         </Link>
         <div className="nav-links">
           {user ? (
@@ -55,6 +56,7 @@ function App() {
               {userProfile?.role === 'owner' && (
                 <>
                   <Link to="/dashboard">Dashboard</Link>
+                  <Link to="/venue">My Venue</Link>
                   <Link to="/pantry">Pantry View</Link>
                 </>
               )}
@@ -76,9 +78,10 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/venue" element={<ProtectedRoute><Venue /></ProtectedRoute>} />
           <Route path="/pantry" element={<ProtectedRoute><PantryView /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-          <Route path="/admin" element={<AdminProtectedRoute authLoading={authLoading}><Admin /></AdminProtectedRoute>} /> {/* Pass loading state */}
+          <Route path="/admin" element={<AdminProtectedRoute authLoading={authLoading}><Admin /></AdminProtectedRoute>} />
           <Route path="/" element={<LandingPage />} />
         </Routes>
       </main>

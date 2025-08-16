@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { db, auth } from '../firebaseConfig';
 import { collection, addDoc, query, where, getDocs, serverTimestamp, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 
-// List of forbidden keywords
 const forbiddenKeywords = [
   'cigarette', 'cigar', 'tobacco', 'pan', 'gutkha', 'khaini', 'smokes', 'vape', 'e-cig', 'hookah',
   'gold flake', 'kings', 'classic', 'wills navy cut', 'four square', 'red & white',
@@ -23,28 +22,16 @@ function MenuManagement() {
     if (auth.currentUser) {
       const q = query(collection(db, "Menu"), where("ownerId", "==", auth.currentUser.uid));
       const querySnapshot = await getDocs(q);
-      const itemsList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setMenuItems(itemsList);
+      setMenuItems(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
     }
   };
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(user => {
-      if (user) {
-        fetchMyMenu();
-      } else {
-        setMenuItems([]);
-      }
-    });
-    return () => unsubscribe();
+    if (auth.currentUser) fetchMyMenu();
   }, []);
 
   const clearForm = () => {
-    setItemName('');
-    setPrice('');
-    setDescription('');
-    setIsEditing(false);
-    setCurrentItemId(null);
+    setItemName(''); setPrice(''); setDescription(''); setIsEditing(false); setCurrentItemId(null);
   };
 
   const handleSubmit = async (e) => {
@@ -57,51 +44,30 @@ function MenuManagement() {
     }
     if (isEditing) {
       const itemDocRef = doc(db, 'Menu', currentItemId);
-      try {
-        await updateDoc(itemDocRef, { ItemName: itemName, Price: Number(price), Description: description });
-        alert("Item updated successfully!");
-        clearForm();
-        fetchMyMenu();
-      } catch (error) {
-        alert("Failed to update item.");
-      }
+      await updateDoc(itemDocRef, { ItemName: itemName, Price: Number(price), Description: description });
+      alert("Item updated successfully!");
     } else {
       const newItem = {
-        ItemName: itemName,
-        Price: Number(price),
-        Description: description,
-        ownerId: auth.currentUser.uid,
-        createdAt: serverTimestamp()
+        ItemName: itemName, Price: Number(price), Description: description,
+        ownerId: auth.currentUser.uid, createdAt: serverTimestamp()
       };
-      try {
-        await addDoc(collection(db, "Menu"), newItem);
-        alert("Item added successfully!");
-        clearForm();
-        fetchMyMenu();
-      } catch (error) {
-        alert("Failed to add item.");
-      }
+      await addDoc(collection(db, "Menu"), newItem);
+      alert("Item added successfully!");
     }
+    clearForm();
+    fetchMyMenu();
   };
 
   const handleEditClick = (item) => {
-    setIsEditing(true);
-    setCurrentItemId(item.id);
-    setItemName(item.ItemName);
-    setPrice(item.Price);
-    setDescription(item.Description);
+    setIsEditing(true); setCurrentItemId(item.id); setItemName(item.ItemName);
+    setPrice(item.Price); setDescription(item.Description);
   };
 
   const handleDeleteClick = async (itemId) => {
     if (window.confirm("Are you sure you want to delete this item?")) {
-      const itemDocRef = doc(db, 'Menu', itemId);
-      try {
-        await deleteDoc(itemDocRef);
-        alert("Item deleted successfully!");
-        fetchMyMenu();
-      } catch (error) {
-        alert("Failed to delete item.");
-      }
+      await deleteDoc(doc(db, 'Menu', itemId));
+      alert("Item deleted successfully!");
+      fetchMyMenu();
     }
   };
 
@@ -110,21 +76,10 @@ function MenuManagement() {
       <div className="add-item-form">
         <h3>{isEditing ? 'Edit Menu Item' : 'Add New Menu Item'}</h3>
         <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label>Item Name</label>
-            <input type="text" value={itemName} onChange={(e) => setItemName(e.target.value)} required />
-          </div>
-          <div className="form-group">
-            <label>Price</label>
-            <input type="number" value={price} onChange={(e) => setPrice(e.target.value)} required />
-          </div>
-          <div className="form-group">
-            <label>Description</label>
-            <textarea value={description} onChange={(e) => setDescription(e.target.value)} required />
-          </div>
-          <button type="submit" className="auth-button">
-            {isEditing ? 'Update Item' : 'Add Item'}
-          </button>
+          <div className="form-group"><label>Item Name</label><input type="text" value={itemName} onChange={(e) => setItemName(e.target.value)} required /></div>
+          <div className="form-group"><label>Price</label><input type="number" value={price} onChange={(e) => setPrice(e.target.value)} required /></div>
+          <div className="form-group"><label>Description</label><textarea value={description} onChange={(e) => setDescription(e.target.value)} required /></div>
+          <button type="submit" className="auth-button">{isEditing ? 'Update Item' : 'Add Item'}</button>
           {isEditing && <button type="button" className="cancel-btn" onClick={clearForm}>Cancel Edit</button>}
         </form>
       </div>
@@ -136,7 +91,7 @@ function MenuManagement() {
               <h4>{item.ItemName}</h4><p>₹{item.Price}</p><p>{item.Description}</p>
             </div>
             <div className="item-actions">
-              <button onClick={() => handleEditClick(item)}>Edit</button>
+              <button onClick={() => handleEditClick(item)} className="edit-btn">Edit</button>
               <button onClick={() => handleDeleteClick(item.id)} className="delete-btn">Delete</button>
             </div>
           </div>
@@ -145,5 +100,4 @@ function MenuManagement() {
     </div>
   );
 }
-
 export default MenuManagement;

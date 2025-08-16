@@ -6,14 +6,12 @@
   padding: 0 2rem;
   box-sizing: border-box;
 }
-
 .profile-page-container h1 {
   font-family: var(--font-heading);
   font-size: 2.5rem;
   margin-top: 0;
   margin-bottom: 2rem;
 }
-
 .rewards-card {
   background-color: #FFFFFF;
   padding: 2.5rem;
@@ -21,24 +19,18 @@
   border: 1px solid var(--border-color);
   box-shadow: var(--card-shadow);
   text-align: center;
+  margin-bottom: 3rem;
 }
-
 .rewards-card h3 {
   font-family: var(--font-heading);
   font-size: 1.5rem;
   margin-top: 0;
 }
-
-.progress-container {
-  margin-top: 2rem;
-}
-
 .progress-text {
   font-weight: 500;
   color: var(--text-medium);
   margin-bottom: 0.75rem;
 }
-
 .progress-bar-background {
   width: 100%;
   height: 10px;
@@ -46,7 +38,6 @@
   border-radius: 5px;
   overflow: hidden;
 }
-
 .progress-bar-foreground {
   height: 100%;
   background-color: var(--primary-color);
@@ -54,38 +45,53 @@
   transition: width 0.5s ease-in-out;
 }
 
-/* NEW ORDER HISTORY STYLES */
+/* ORDER HISTORY STYLES V2 */
 .order-history {
   margin-top: 3rem;
 }
-
 .order-history h2 {
   font-family: var(--font-heading);
   font-size: 1.8rem;
   margin-bottom: 1.5rem;
 }
-
 .business-group {
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
 }
-
-.business-name {
+.business-name-accordion {
+  background-color: #FFFFFF;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  width: 100%;
+  box-sizing: border-box;
+  text-align: left;
   font-family: var(--font-heading);
   font-size: 1.25rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 2px solid var(--border-color);
-  margin-bottom: 1rem;
-  text-transform: capitalize;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background-color 0.2s;
 }
-
+.business-name-accordion:hover {
+  background-color: var(--light-gray-bg);
+}
+.accordion-content {
+  padding: 1rem;
+  border: 1px solid var(--border-color);
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+}
 .order-summary-card {
-  background-color: #FFFFFF;
+  background-color: var(--light-gray-bg);
   border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 1rem;
   margin-bottom: 1rem;
 }
-
+.order-summary-card:last-child {
+  margin-bottom: 0;
+}
 .order-summary-header {
   display: flex;
   justify-content: space-between;
@@ -96,13 +102,11 @@
   margin-bottom: 0.75rem;
   border-bottom: 1px solid var(--border-color);
 }
-
 .order-summary-card ul {
   list-style: none;
   padding: 0;
   margin: 0;
 }
-
 .order-summary-card li {
   padding: 0.25rem 0;
 }
