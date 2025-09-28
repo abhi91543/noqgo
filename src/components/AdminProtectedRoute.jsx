@@ -1,25 +1,40 @@
 import { Navigate } from 'react-router-dom';
-import { auth } from '../firebaseConfig';
 
-// Make sure this is your SUPER ADMIN User ID
-const ADMIN_UID = "v9coxkgZAHWuNLHTGjLJLweDSC12"; 
-
-const AdminProtectedRoute = ({ children, authLoading }) => {
-  // If authentication is still loading, show a loading message
+const AdminProtectedRoute = ({ children, userProfile, authLoading, requireSuperAdmin = false }) => {
+  
+  // 1. అథెంటికేషన్ లోడ్ అవుతున్నప్పుడు, "Loading..." అని చూపించు
   if (authLoading) {
     return (
-      <div className="page-container">
+      <div className="page-container" style={{ textAlign: 'center' }}>
         <h1>Loading...</h1>
       </div>
     );
   }
 
-  // After loading is done, then check for the user and their UID
-  if (!auth.currentUser || auth.currentUser.uid !== ADMIN_UID) {
-    return <Navigate to="/" />;
+  // 2. యూజర్ లాగిన్ అయి ఉండాలి మరియు వారికి ఒక ప్రొఫైల్ ఉండాలి
+  if (!userProfile) {
+    return <Navigate to="/login" />;
   }
 
-  return children;
+  const role = userProfile.role?.toLowerCase();
+
+  // 3. ఒకవేళ ఈ పేజీకి కచ్చితంగా Super Admin అవసరమైతే (ఉదా: /admin పేజీ)
+  if (requireSuperAdmin) {
+    if (role === 'superadmin') {
+      return children; // Super Admin అయితే, పేజీని చూపించు
+    } else {
+      return <Navigate to="/" />; // ఇతరులను హోమ్ పేజీకి పంపు
+    }
+  }
+
+  // 4. సాధారణ మేనేజ్‌మెంట్ పేజీల కోసం (/management)
+  // యూజర్ 'owner' లేదా 'superadmin' అయితే, పేజీని చూపించు
+  if (role === 'owner' || role === 'superadmin') {
+    return children;
+  }
+
+  // ఏదీ కాకపోతే, హోమ్ పేజీకి పంపు
+  return <Navigate to="/" />;
 };
 
 export default AdminProtectedRoute;

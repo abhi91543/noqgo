@@ -1,0 +1,136 @@
+.order-page-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 1rem; /* Adjusted for mobile */
+  font-family: 'Inter', sans-serif;
+  color: #333;
+}
+
+.order-page-header h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #888;
+  margin: 0 0 1rem 0;
+  text-align: center;
+}
+
+.dialogue-box {
+  background-color: #f8f9fa;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin: 1rem 0;
+  border: 1px solid #e9ecef;
+  text-align: center;
+}
+
+.dialogue-text {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.location-info {
+  font-size: 1rem;
+  color: #6c757d;
+  margin-top: 1rem;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.menu-and-cart-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.menu-list, .cart-summary {
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid #e9ecef;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.menu-list h3, .cart-summary h3 {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  font-size: 1.25rem;
+  color: #111827;
+}
+
+.menu-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.menu-item:last-child {
+  border-bottom: none;
+}
+
+.item-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.item-name {
+  font-weight: 600;
+}
+
+.item-price {
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+.add-to-cart-btn {
+  background-color: #FBBF24;
+  color: #111827;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.add-to-cart-btn:hover {
+  background-color: #F59E0B;
+}
+
+.cart-item, .cart-total {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+}
+
+.cart-summary hr {
+  border: none;
+  border-top: 1px solid #e9ecef;
+  margin: 1rem 0;
+}
+
+.place-order-btn {
+  width: 100%;
+  padding: 1rem;
+  font-size: 1rem;
+  font-weight: 700;
+  background-color: #111827;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-top: 1rem;
+  transition: opacity 0.2s;
+}
+
+.place-order-btn:hover {
+  opacity: 0.9;
+}
+
+.error-subtext {
+    font-size: 0.9rem;
+    color: #ff8c00;
+}

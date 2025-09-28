@@ -7,8 +7,9 @@
 
 .date-range-header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column; /* MOBILE: Stack items vertically */
+  align-items: flex-start; /* MOBILE: Align to the left */
+  gap: 1rem;
   margin-bottom: 1.5rem;
 }
 
@@ -44,7 +45,7 @@
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: 1fr; /* MOBILE: Single column */
   gap: 1.5rem;
   margin-top: 1.5rem;
   margin-bottom: 1.5rem;
@@ -73,7 +74,7 @@
 
 .dashboard-main-analytics {
   display: grid;
-  grid-template-columns: 2fr 1fr;
+  grid-template-columns: 1fr; /* MOBILE: Single column */
   gap: 1.5rem;
   align-items: flex-start;
 }
@@ -129,7 +130,32 @@
 
 .dashboard-content {
   display: grid;
-  grid-template-columns: 1fr 2fr;
+  grid-template-columns: 1fr; /* MOBILE: Single column */
   gap: 2rem;
   align-items: flex-start;
+}
+
+
+/* --- RESPONSIVE STYLES --- */
+
+/* On tablets and larger */
+@media (min-width: 576px) {
+  .stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* On laptops and larger */
+@media (min-width: 992px) {
+  .date-range-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .dashboard-main-analytics {
+    grid-template-columns: 2fr 1fr;
+  }
+  .dashboard-content {
+    grid-template-columns: 1fr 2fr;
+  }
 }

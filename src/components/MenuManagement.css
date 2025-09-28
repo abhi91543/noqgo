@@ -1,0 +1,53 @@
+.menu-management-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+}
+
+@media (min-width: 768px) {
+  .menu-management-layout {
+    grid-template-columns: 300px 1fr;
+  }
+}
+
+.add-item-form {
+  background-color: #f9fafb;
+  padding: 1.5rem;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.my-menu-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.menu-item-card {
+  background-color: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.menu-item-card h4 {
+  margin: 0 0 0.25rem 0;
+  font-size: 1.2rem;
+}
+
+.menu-item-card .price {
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 0.5rem;
+}
+
+.menu-item-card .description {
+  color: #6b7280;
+  margin-bottom: 1rem;
+  min-height: 40px; /* Ensures consistent card height */
+}
+
+.menu-item-actions button {
+  margin-right: 0.5rem;
+}

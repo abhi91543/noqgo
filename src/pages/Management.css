@@ -1,0 +1,85 @@
+/* New structure for sticky header layout */
+.management-page-wrapper {
+  display: flex;
+  flex-direction: column;
+  /* Adjust 60px to your actual top navbar height if needed */
+  height: calc(100vh - 60px); 
+}
+
+/* This is the part that will be "frozen" or sticky */
+.management-header {
+  position: sticky;
+  top: 0;
+  /* --- THIS IS THE FIX --- */
+  z-index: 999; /* Changed from 10 to 999 to be on top of the map */
+  /* --- END OF FIX --- */
+  background-color: white;
+  padding: 1rem 2rem 0 2rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.management-header h1 {
+  font-size: 2rem;
+  font-weight: 800;
+  margin: 0 0 1.5rem 0;
+  color: #111827;
+}
+
+/* This is the content area that will scroll */
+.management-content {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 2rem;
+}
+
+.management-tabs {
+  display: flex;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Hides the scrollbar but keeps it functional on touch devices */
+.management-tabs::-webkit-scrollbar {
+  display: none; /* For Chrome, Safari, Opera */
+}
+.management-tabs {
+  -ms-overflow-style: none;  /* For IE and Edge */
+  scrollbar-width: none;  /* For Firefox */
+}
+
+.management-tabs button {
+  padding: 0.75rem 1rem;
+  margin-bottom: -1px; /* Overlaps the bottom border */
+  border: none;
+  border-bottom: 2px solid transparent;
+  background-color: transparent;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #6b7280;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease-in-out;
+}
+
+.management-tabs button:hover {
+  background-color: #f9fafb;
+  color: #111827;
+}
+
+.management-tabs button.active {
+  color: #111827;
+  border-bottom: 2px solid #FBBF24;
+}
+
+/* On larger screens, use more padding */
+@media (min-width: 768px) {
+  .management-header {
+    padding: 2rem 2rem 0 2rem;
+  }
+  .management-header h1 {
+    font-size: 2.5rem;
+  }
+  .management-tabs button {
+     padding: 1rem 1.5rem;
+  }
+}

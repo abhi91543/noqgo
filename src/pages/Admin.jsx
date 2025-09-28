@@ -30,7 +30,7 @@ function Admin() {
 
   return (
     <div className="page-container">
-      <h1>Admin Panel</h1>
+      <h1>Super Admin Panel</h1>
       <p>Manage all users and their roles.</p>
       
       <table className="user-list-table">
@@ -49,6 +49,8 @@ function Admin() {
                 <select value={user.role || 'customer'} onChange={(e) => handleRoleChange(user.id, e.target.value)}>
                   <option value="customer">Customer</option>
                   <option value="owner">Owner</option>
+                  <option value="staff">Staff</option>
+                  <option value="superadmin">Super Admin</option>
                 </select>
               </td>
               <td>
@@ -57,7 +59,6 @@ function Admin() {
                   <option value="theatre">Theatre</option>
                   <option value="cafe">Cafe</option>
                   <option value="restaurant">Restaurant</option>
-                  <option value="hotel">Hotel</option>
                 </select>
               </td>
             </tr>

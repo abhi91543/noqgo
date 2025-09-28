@@ -3,32 +3,32 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    function adminId() {
-      return 'v9coxkgZAHWuNLHTGjLJLweDSC12'; // Your Admin UID
+    function isOwner() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'owner';
     }
 
     match /Menu/{itemId} {
       allow read: if true;
-      allow write: if request.auth.uid == request.resource.data.ownerId || request.auth.uid == adminId();
+      allow write: if isOwner();
     }
 
     match /users/{userId} {
-      allow read: if request.auth.uid == adminId() || request.auth.uid == userId;
-      allow update: if request.auth.uid == adminId() || request.auth.uid == userId;
+      // FIX: Allow any logged-in user to read profile data.
+      // This is needed for customers to get the venue's location for geo-fencing.
+      allow read: if request.auth != null;
+      
+      // Only the user or an owner can update a profile.
+      allow update: if request.auth.uid == userId || isOwner();
       allow create: if request.auth.uid == userId;
     }
 
     match /Orders/{orderId} {
       allow create: if request.auth.uid != null;
-      allow read, update: if request.auth.uid == adminId() || request.auth.uid == resource.data.ownerId || request.auth.uid == resource.data.customerId;
+      allow read, update: if isOwner() || request.auth.uid == resource.data.customerId;
     }
 
-    // --- NEW RULE ADDED HERE ---
     match /Locations/{locationId} {
-      // A user can create a location if they are the owner.
-      allow create: if request.auth.uid == request.resource.data.ownerId;
-      // A user can read, update, or delete a location only if they are the owner.
-      allow read, update, delete: if request.auth.uid == resource.data.ownerId;
+      allow read, write, delete: if isOwner();
     }
   }
 }

@@ -1,8 +1,24 @@
 import { useState, useEffect, useMemo } from 'react';
 import { db, auth } from '../firebaseConfig';
-import { doc, getDoc, updateDoc, collection, addDoc, query, where, getDocs, writeBatch, orderBy, deleteDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, collection, addDoc, query, where, getDocs, writeBatch, deleteDoc } from 'firebase/firestore';
 import { MapContainer, TileLayer, Marker, Circle, useMapEvents } from 'react-leaflet';
+import { QRCodeCanvas } from 'qrcode.react';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 import './Venue.css';
+import L from 'leaflet'; // Import Leaflet
+
+// --- FIX for broken map icons in production ---
+import icon from 'leaflet/dist/images/marker-icon.png';
+import iconShadow from 'leaflet/dist/images/marker-shadow.png';
+let DefaultIcon = L.icon({
+    iconUrl: icon,
+    shadowUrl: iconShadow,
+    iconSize: [25, 41],
+    iconAnchor: [12, 41]
+});
+L.Marker.prototype.options.icon = DefaultIcon;
+// --- END of FIX ---
 
 // --- Reusable Map Picker Component ---
 function LocationPicker({ savedPosition, radius, onPositionChange }) {
@@ -63,14 +79,14 @@ function Venue() {
   const [currentLocationId, setCurrentLocationId] = useState(null);
   const [gpsLocation, setGpsLocation] = useState([17.3850, 78.4867]);
   const [radius, setRadius] = useState(200);
-
-  // Form states
   const [screen, setScreen] = useState('1');
   const [row, setRow] = useState('A');
   const [seat, setSeat] = useState('');
   const [seatFrom, setSeatFrom] = useState(1);
   const [seatTo, setSeatTo] = useState(10);
   const [table, setTable] = useState('');
+  const [qrCodeData, setQrCodeData] = useState(null);
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 
   const fetchVenueData = async () => {
     if (auth.currentUser) {
@@ -167,6 +183,44 @@ function Venue() {
     }
   };
 
+  const handleGenerateQr = (location) => {
+    const ownerId = auth.currentUser.uid;
+    const locationName = location.screen ? `Screen ${location.screen}, Seat ${location.seat}` : `Table ${location.table}`;
+    const url = `${window.location.origin}/order/${ownerId}/${location.screen || 'none'}/${location.seat || location.table}`;
+    setQrCodeData({ url, label: locationName });
+  };
+
+  const handleDownloadQr = () => {
+    const canvas = document.getElementById('qr-code-canvas');
+    const pngUrl = canvas.toDataURL('image/png').replace('image/png', 'image/octet-stream');
+    let downloadLink = document.createElement('a');
+    downloadLink.href = pngUrl;
+    downloadLink.download = `${qrCodeData.label}-qrcode.png`;
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+  };
+
+  const handleDownloadAllPdfs = async () => {
+    setIsGeneratingPdf(true);
+    setTimeout(async () => {
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const qrItems = document.querySelectorAll('.qr-pdf-item');
+      
+      for (let i = 0; i < qrItems.length; i++) {
+        const qrItem = qrItems[i];
+        const canvas = await html2canvas(qrItem);
+        const imgData = canvas.toDataURL('image/png');
+        
+        if (i > 0) pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 10, 10, 190, 0);
+      }
+      
+      pdf.save('All-Venue-QR-Codes.pdf');
+      setIsGeneratingPdf(false);
+    }, 100);
+  };
+  
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -222,6 +276,31 @@ function Venue() {
         </div>
       )}
 
+      {qrCodeData && (
+        <div className="modal-backdrop" onClick={() => setQrCodeData(null)}>
+          <div className="modal-content qr-modal" onClick={e => e.stopPropagation()}>
+            <h3>{qrCodeData.label}</h3>
+            <QRCodeCanvas 
+              id="qr-code-canvas" 
+              value={qrCodeData.url} 
+              size={256} 
+              level={"H"}
+              includeMargin={true}
+              imageSettings={{
+                src: "/logo.png",
+                height: 48,
+                width: 48,
+                excavate: true,
+              }}
+            />
+            <div>
+              <button onClick={handleDownloadQr} className="action-button">Download</button>
+              <button onClick={() => setQrCodeData(null)} className="secondary-button">Close</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="page-container">
         <h1>My Venue Setup</h1>
         
@@ -238,10 +317,7 @@ function Venue() {
               <LocationPicker savedPosition={gpsLocation} radius={radius} onPositionChange={handleLocationSave} />
               <div className="radius-slider">
                 <label htmlFor="radius">Delivery Radius: <span className="radius-value">{radius} meters</span></label>
-                <input 
-                  type="range" id="radius" min="50" max="1000" step="50" 
-                  value={radius} onChange={(e) => setRadius(e.target.value)}
-                />
+                <input type="range" id="radius" min="50" max="1000" step="50" value={radius} onChange={(e) => setRadius(e.target.value)} />
                 <button className="auth-button" style={{marginTop: '1rem'}} onClick={handleRadiusSave}>Save Radius</button>
               </div>
             </div>
@@ -257,7 +333,12 @@ function Venue() {
                     <div className="location-list">
                         <div className="location-list-header">
                             <h3>My Saved Locations</h3>
-                            <input type="text" placeholder="Search locations..." className="search-input" value={searchTerm} onChange={e => { setSearchTerm(e.target.value); setCurrentPage(1); }}/>
+                            <div style={{display: 'flex', alignItems: 'center'}}>
+                                <button onClick={handleDownloadAllPdfs} className="download-all-btn" disabled={isGeneratingPdf || allLocations.length === 0}>
+                                    {isGeneratingPdf ? 'Generating...' : 'Download All as PDF'}
+                                </button>
+                                <input type="text" placeholder="Search locations..." className="search-input" value={searchTerm} onChange={e => { setSearchTerm(e.target.value); setCurrentPage(1); }}/>
+                            </div>
                         </div>
                         <table className="locations-table">
                             <thead><tr><th>{userProfile.businessType === 'theatre' ? 'Screen' : 'Table'}</th>{userProfile.businessType === 'theatre' && <th>Seat</th>}<th>Actions</th></tr></thead>
@@ -266,7 +347,13 @@ function Venue() {
                                     <tr key={loc.id}>
                                         <td>{loc.screen || loc.table}</td>
                                         {userProfile.businessType === 'theatre' && <td>{loc.seat}</td>}
-                                        <td><div className="location-item-actions"><button onClick={() => openEditModal(loc)} className="edit-btn">Edit</button><button onClick={() => handleDeleteLocation(loc.id)} className="delete-btn">Delete</button></div></td>
+                                        <td>
+                                          <div className="location-item-actions">
+                                            <button onClick={() => openEditModal(loc)} className="edit-btn">Edit</button>
+                                            <button onClick={() => handleDeleteLocation(loc.id)} className="delete-btn">Delete</button>
+                                            <button onClick={() => handleGenerateQr(loc)} className="qr-code-btn">QR</button>
+                                          </div>
+                                        </td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -282,6 +369,27 @@ function Venue() {
           </div>
         )}
       </div>
+
+      {isGeneratingPdf && (
+        <div className="hidden-qr-container">
+          {allLocations.map(loc => {
+            const ownerId = auth.currentUser.uid;
+            const locationName = loc.screen ? `Screen ${loc.screen}, Seat ${loc.seat}` : `Table ${loc.table}`;
+            const url = `${window.location.origin}/order/${ownerId}/${loc.screen || 'none'}/${loc.seat || location.table}`;
+            return (
+              <div key={loc.id} className="qr-pdf-item" id={`pdf-item-${loc.id}`}>
+                <h3>{locationName}</h3>
+                <QRCodeCanvas 
+                  value={url} 
+                  size={500} 
+                  level={"H"}
+                  includeMargin={true} 
+                  imageSettings={{ src: "/999orders-logo.png", height: 90, width: 90, excavate: true }} />
+              </div>
+            );
+          })}
+        </div>
+      )}
     </>
   );
 }
