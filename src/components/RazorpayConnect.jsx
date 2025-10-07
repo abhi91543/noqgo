@@ -51,7 +51,7 @@ const RazorpayConnect = () => {
 
     try {
       // --- THIS IS THE FIX ---
-      // We are now calling the new, correctly named function: 'setupRazorpayVendor'
+      // Changed the function name to the new one: 'setupRazorpayVendor'
       const setupRazorpayVendor = httpsCallable(functions, 'setupRazorpayVendor');
       const result = await setupRazorpayVendor({ venueId: venueId });
       // --- END OF FIX ---
