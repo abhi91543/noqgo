@@ -1,8 +1,11 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { getFirestore, collection, query, where, getDocs, onSnapshot } from 'firebase/firestore';
+// RazorpayConnect.jsx
+
+import React, { useState, useEffect } from 'react';
+import { getFirestore, collection, query, where, onSnapshot } from 'firebase/firestore';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { getAuth } from "firebase/auth";
 import { getApp } from "firebase/app";
+import RazorpayOnboardingForm from './RazorpayOnboardingForm'; // కొత్త ఫారంను ఇక్కడ ఇంపోర్ట్ చేయండి
 
 const RazorpayConnect = () => {
   const [razorpayStatus, setRazorpayStatus] = useState('loading');
@@ -11,21 +14,18 @@ const RazorpayConnect = () => {
   const [isConnecting, setIsConnecting] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
   const auth = getAuth();
-
   const app = getApp();
   const functions = getFunctions(app, 'asia-south1');
 
-
   useEffect(() => {
     if (!auth.currentUser) return;
-
     const db = getFirestore();
     const locationsRef = collection(db, 'Locations');
     const q = query(locationsRef, where('ownerId', '==', auth.currentUser.uid));
 
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      if (!querySnapshot.empty) {
-        const venueDoc = querySnapshot.docs[0];
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      if (!snapshot.empty) {
+        const venueDoc = snapshot.docs[0];
         setVenueId(venueDoc.id);
         const razorpayData = venueDoc.data().razorpay;
         setRazorpayStatus(razorpayData?.status || 'not_connected');
@@ -50,21 +50,18 @@ const RazorpayConnect = () => {
     setMessage({ type: '', text: '' });
 
     try {
-      // --- THIS IS THE FIX ---
-      // Changed the function name to the new one: 'setupRazorpayVendor'
-      const setupRazorpayVendor = httpsCallable(functions, 'setupRazorpayVendor');
-      const result = await setupRazorpayVendor({ venueId: venueId });
-      // --- END OF FIX ---
+      const createRazorpayLinkedAccount = httpsCallable(functions, 'createRazorpayLinkedAccount');
+      const result = await createRazorpayLinkedAccount({ venueId: venueId });
       
-      if (result.data.success && result.data.accountId) {
-        const onboardingUrl = `https://dashboard.razorpay.com/authorize/${result.data.accountId}`;
-        window.location.href = onboardingUrl;
+      if (result.data.success) {
+        setMessage({ type: 'success', text: 'Account created! Please complete the next step.' });
       } else {
-        throw new Error('Failed to get account details from server.');
+        throw new Error(result.data.message || 'Failed to create linked account.');
       }
     } catch (error) {
       console.error("Error connecting to Razorpay:", error);
       setMessage({ type: 'error', text: error.message || 'Could not connect to Razorpay.' });
+    } finally {
       setIsConnecting(false);
     }
   };
@@ -76,40 +73,36 @@ const RazorpayConnect = () => {
       case 'not_connected':
         return (
           <>
-            <p>Connect your Razorpay account to receive payments directly to your bank account.</p>
+            <p>Connect your Razorpay account to receive payments directly.</p>
             <button onClick={handleConnect} disabled={isConnecting}>
               {isConnecting ? 'Connecting...' : 'Connect with Razorpay'}
             </button>
           </>
         );
       case 'created':
-        return (
-          <div style={{color: '#EAB308'}}>
-            <p><strong>Pending Activation:</strong> Your Razorpay account is created but requires activation. Please complete the onboarding process.</p>
-            <button onClick={() => window.location.href = `https://dashboard.razorpay.com/authorize/${accountId}`}>
-              Complete Onboarding
-            </button>
-          </div>
-        );
+        // అకౌంట్ క్రియేట్ అయిన తర్వాత, KYC ఫారం చూపించండి
+        return <RazorpayOnboardingForm accountId={accountId} venueId={venueId} />;
       case 'activated':
         return (
            <div style={{color: '#22C55E'}}>
-            <p><strong>Active:</strong> Your Razorpay account is connected and ready to receive payments.</p>
+            <p><strong>✓ Active:</strong> Your Razorpay account is connected and ready to receive payments.</p>
             <p><small>Account ID: {accountId}</small></p>
-          </div>
+           </div>
         );
       case 'no_venue':
         return <p style={{color: 'red'}}>No venue is associated with your account.</p>;
       default:
-        return <p style={{color: 'red'}}>An error occurred while fetching your payment status.</p>;
+        return <p style={{color: 'red'}}>An error occurred.</p>;
     }
   };
 
   return (
-    <div style={{ padding: '20px', border: '1px solid #ccc', borderRadius: '8px', maxWidth: '500px', margin: '20px 0' }}>
-      <h3>Payout Account</h3>
+    <div style={{ padding: '20px', border: '1px solid #eee', borderRadius: '8px', maxWidth: '600px', margin: '20px auto', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
+      <h3 style={{borderBottom: '1px solid #eee', paddingBottom: '10px'}}>Payout Account</h3>
       {renderStatus()}
-      {message.text && <p style={{color: message.type === 'error' ? 'red' : 'blue'}}>{message.text}</p>}
+      {message.text && !['created', 'activated'].includes(razorpayStatus) && 
+        <p style={{color: message.type === 'error' ? 'red' : 'green', marginTop: '15px'}}>{message.text}</p>
+      }
     </div>
   );
 };
